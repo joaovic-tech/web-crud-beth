@@ -11,7 +11,6 @@ export const BaseHtml = ({ children }: elements.Children) => `
   <script src="https://unpkg.com/htmx.org@1.9.3"></script>
   <script src="https://unpkg.com/hyperscript.org@0.9.9"></script>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="/styles.css" rel="stylesheet">
 </head>
 <body class="flex justify-center items-center h-screen">${children}</body>
 </html>
