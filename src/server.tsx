@@ -1,8 +1,9 @@
 import cors from "@elysiajs/cors";
 import { html, Html } from "@elysiajs/html";
-import Elysia from "elysia";
+import Elysia, { t } from "elysia";
 import { BaseHtml } from "./components/BaseHtml";
-import { TodoList } from "./components/Tasks/TodoList";
+import { db, TodoList } from "./components/Tasks/TodoList";
+import TodoItem from "./components/Tasks/TodoItem";
 
 const app = new Elysia()
   .use(cors())
@@ -10,6 +11,20 @@ const app = new Elysia()
   .onError(({ code, error }) => {
     if (code === "NOT_FOUND") {
       return new Response("Página não encontrada!");
+    }
+
+    if (code === "VALIDATION") {
+      let errorMessage: string;
+
+      if (error.message.includes("equal to 3")) {
+        errorMessage = `Erro: O campo deve ter pelo menos 3 caracteres de comprimento.`;
+      }
+
+      if (error.message.includes("equal to 50")) {
+        errorMessage = `Erro: O campo deve ter menos de 50 caracteres de comprimento.`;
+      }
+
+      return new Response(errorMessage);
     }
 
     return new Response(error.toString());
@@ -57,8 +72,66 @@ const app = new Elysia()
     )
   )
   .get("/todos", ({ html }) => html(<TodoList></TodoList>))
-  .listen(process.env.PORT || 3000);
+  .post(
+    "/todos/toggle/:id",
+    ({ params }) => {
+      const todo = db.find((todo) => todo.id === parseInt(params.id));
 
-console.log(
-  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
-);
+      if (todo) {
+        todo.completed = !todo.completed;
+        return <TodoItem {...todo} />;
+      }
+    },
+    {
+      params: t.Object({
+        id: t.String(),
+      }),
+    }
+  )
+  .delete(
+    "/todos/:id",
+    ({ params }) => {
+      const todo = db.find((todo) => todo.id === parseInt(params.id));
+
+      if (todo) {
+        db.slice(db.indexOf(todo), 1);
+      }
+    },
+    {
+      params: t.Object({
+        id: t.String(),
+      }),
+    }
+  )
+  .post(
+    "/todos",
+    ({ body }: any) => {
+      body.content = Number(body.content);
+
+      if (typeof body.content === "number" || !body) {
+        throw new Error("Valor inválido!");
+      }
+
+      body.content = String(body.content);
+
+      const newTodo = {
+        id: 45,
+        content: body.content,
+        completed: false,
+      };
+
+      db.push(newTodo);
+      return <TodoItem {...newTodo} />;
+    },
+    {
+      body: t.Object({
+        content: t.String({
+          maxLength: 50,
+          minLength: 3,
+        }),
+      }),
+    }
+  )
+  .listen(process.env.PORT || 3000, (app: any) => {
+    console.log(`🦊 Elysia is running at ${app?.hostname}:${app?.port}`);
+  });

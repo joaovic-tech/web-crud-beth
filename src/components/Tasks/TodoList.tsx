@@ -1,4 +1,5 @@
 import { BaseHtml } from "../BaseHtml";
+import Form from "../Form";
 import TodoItem from "./TodoItem";
 
 type Todo = {
@@ -22,7 +23,7 @@ export const db: Todo[] = [
 export function TodoList() {
   return (
     <BaseHtml>
-      <main
+      <div
         hx-target="this"
         hx-swap="outerHTML"
         class="flex flex-col gap-2 w-full px-20"
@@ -34,8 +35,9 @@ export function TodoList() {
           {db.map((todo) => (
             <TodoItem {...todo} />
           ))}
+          <Form />
         </div>
-      </main>
+      </div>
     </BaseHtml>
   );
 }

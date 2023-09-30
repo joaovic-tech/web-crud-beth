@@ -35,7 +35,7 @@ const IconCheck = ({ children }: elements.Children) => `
 
 export default function TodoItem({ content, completed, id }: Todo) {
   return (
-    <div
+    <main
       class={`flex items-center justify-between p-4 ${
         completed ? "bg-zinc-100" : "bg-white"
       } rounded shadow-md hover:shadow-none transition duration-300 ease-in-out border-b hover:bg-zinc-100`}
@@ -53,20 +53,20 @@ export default function TodoItem({ content, completed, id }: Todo) {
             completed ? "bg-green-500" : "bg-white border border-gray-300"
           } text-zinc-50 p-2 rounded`}
           hx-post={`/todos/toggle/${id}`}
+          hx-target="closest main"
           hx-swap="outerHTML"
-          hx-target="closest div"
         >
           <IconCheck />
         </button>
         <button
           class="bg-red-500 hover:bg-red-700 text-zinc-50 p-2 rounded"
           hx-delete={`/todos/${id}`}
+          hx-target="closest main"
           hx-swap="outerHTML"
-          hx-target="closest div"
         >
           <IconTrash />
         </button>
       </div>
-    </div>
+    </main>
   );
 }
